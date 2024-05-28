@@ -25,12 +25,12 @@ public class ErrorHandleController implements ErrorController {
         return "error";
     }
 
-    private int getErrorStatus(HttpServletRequest request) {
+    int getErrorStatus(HttpServletRequest request) {
         final var status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         return status != null ? Integer.parseInt(status.toString()) : 0;
     }
 
-    private String getErrorType(int statusCode) {
+    String getErrorType(int statusCode) {
         return switch (statusCode) {
             case 400 -> "Bad Request";
             case 401 -> "Unauthorized";
