@@ -1,0 +1,16 @@
+services:
+  servermonitor-backend:
+    image: servermonitor-backend:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: servermonitor-backend
+    ports:
+      - "8052:8052"
+    networks:
+      - servermonitor-net
+    restart: unless-stopped
+
+networks:
+  servermonitor-net:
+    name: servermonitor-net
