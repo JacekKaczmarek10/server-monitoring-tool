@@ -1,6 +1,6 @@
 package com.dockermonitor.controller.rest;
 
-import com.dockermonitor.dto.MonitoredAppDto;
+import com.dockermonitor.dto.MonitoredApplicationDto;
 import com.dockermonitor.entity.MonitoredApplication;
 import com.dockermonitor.exception.ApplicationNotFoundException;
 import com.dockermonitor.service.MonitoredApplicationService;
@@ -17,8 +17,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
+import org.springframework.test.web.servlet.ResultActions;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -42,36 +45,51 @@ class MonitoringApplicationControllerTest {
     private ObjectMapper objectMapper;
 
     private MonitoredApplication application;
-    private MonitoredAppDto applicationDto;
+    private MonitoredApplicationDto applicationDto;
+    private Long monitoredApplicationId = 1L;
 
     @BeforeEach
     void setUp() {
         application = new MonitoredApplication();
-        application.setId(1L);
+        application.setId(monitoredApplicationId);
         application.setName("Codepred");
 
-        applicationDto = new MonitoredAppDto("Codepred", "https://codepred.pl/");
+        applicationDto = new MonitoredApplicationDto("Codepred", "https://codepred.pl/");
     }
 
     @Nested
     class GetApplicationsTest {
 
         @Test
+        void shouldCallService() throws Exception {
+            when(service.findAll()).thenReturn(Collections.singletonList(application));
+
+            doRequest().andExpect(status().isOk()).andExpect(jsonPath("$[0].name").value(application.getName()));
+
+            verify(service).findAll();
+        }
+
+        @Test
         void shouldReturnApplications() throws Exception {
             when(service.findAll()).thenReturn(Collections.singletonList(application));
 
-            mockMvc.perform(get("/api/applications"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value(application.getName()));
+            doRequest().andExpect(status().isOk()).andExpect(jsonPath("$[0].name").value(application.getName()));
         }
 
         @Test
         void shouldReturnEmptyList() throws Exception {
             when(service.findAll()).thenReturn(Collections.emptyList());
 
-            mockMvc.perform(get("/api/applications"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isEmpty());
+            doRequest().andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
+        }
+
+        @Test
+        void shouldReturnOk() throws Exception {
+            doRequest().andExpect(status().isOk());
+        }
+
+        private ResultActions doRequest() throws Exception {
+            return mockMvc.perform(get("/api/applications"));
         }
 
     }
@@ -80,20 +98,35 @@ class MonitoringApplicationControllerTest {
     class GetApplicationTest {
 
         @Test
-        void shouldReturnApplication() throws Exception {
+        void shouldCallService() throws Exception {
             when(service.getById(anyLong())).thenReturn(application);
 
-            mockMvc.perform(get("/api/applications/{id}", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(application.getName()));
+            doRequest().andExpect(jsonPath("$.name").value(application.getName()));
+
+            verify(service).getById(monitoredApplicationId);
         }
 
         @Test
-        void shouldReturnEmpty() throws Exception {
+        void shouldReturnApplication() throws Exception {
+            when(service.getById(anyLong())).thenReturn(application);
+
+            doRequest().andExpect(jsonPath("$.name").value(application.getName()));
+        }
+
+        @Test
+        void shouldReturnNotFound() throws Exception {
             when(service.getById(anyLong())).thenThrow(ApplicationNotFoundException.class);
 
-            mockMvc.perform(get("/api/applications/{id}", 1L))
-                .andExpect(status().isNotFound());
+            doRequest().andExpect(status().isNotFound());
+        }
+
+        @Test
+        void shouldReturnOk() throws Exception {
+            doRequest().andExpect(status().isOk());
+        }
+
+        private ResultActions doRequest() throws Exception {
+            return mockMvc.perform(get("/api/applications/{id}", monitoredApplicationId));
         }
     }
 
@@ -101,20 +134,35 @@ class MonitoringApplicationControllerTest {
     class GetApplicationStatusTest {
 
         @Test
-        void shouldReturnApplicationStatus() throws Exception {
-            when(service.getStatusById(anyLong())).thenReturn(true);
+        void shouldCallService() throws Exception {
+            when(service.getStatusById(monitoredApplicationId)).thenReturn(true);
 
-            mockMvc.perform(get("/api/applications/{id}/status", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").value(true));
+            doRequest().andExpect(status().isOk()).andExpect(jsonPath("$").value(true));
+
+            verify(service).getStatusById(monitoredApplicationId);
         }
 
         @Test
-        void shouldThrowApplicationNotFoundException() throws Exception {
-            when(service.getStatusById(anyLong())).thenThrow(ApplicationNotFoundException.class);
+        void shouldReturnApplicationStatus() throws Exception {
+            when(service.getStatusById(monitoredApplicationId)).thenReturn(true);
 
-            mockMvc.perform(get("/api/applications/{id}/status", 1L))
-                .andExpect(status().isNotFound());
+            doRequest().andExpect(status().isOk()).andExpect(jsonPath("$").value(true));
+        }
+
+        @Test
+        void shouldReturnNotFound() throws Exception {
+            when(service.getStatusById(monitoredApplicationId)).thenThrow(ApplicationNotFoundException.class);
+
+            doRequest().andExpect(status().isNotFound());
+        }
+
+        @Test
+        void shouldReturnOk() throws Exception {
+            doRequest().andExpect(status().isOk());
+        }
+
+        private ResultActions doRequest() throws Exception {
+            return mockMvc.perform(get("/api/applications/{id}/status", monitoredApplicationId));
         }
     }
 
@@ -122,28 +170,101 @@ class MonitoringApplicationControllerTest {
     class CreateApplicationTest {
 
         @Test
-        void shouldCreateApplication() throws Exception {
-            when(service.create(any(MonitoredAppDto.class))).thenReturn(application);
+        void shouldCallService() throws Exception {
+            when(service.create(applicationDto)).thenReturn(application);
 
-            mockMvc.perform(post("/api/applications")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(applicationDto)))
-                .andExpect(status().isOk())
+            doRequest(objectMapper.writeValueAsString(applicationDto)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(application.getName()));
+
+            verify(service).create(applicationDto);
+        }
+
+        @Test
+        void shouldCreateApplication() throws Exception {
+            when(service.create(applicationDto)).thenReturn(application);
+
+            doRequest(objectMapper.writeValueAsString(applicationDto)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(application.getName()));
         }
+
+        @Test
+        void shouldReturnBadRequestNoBody() throws Exception {
+            doRequest("").andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void shouldReturnBadRequestNoName() throws Exception {
+            final var body = "{ \"url\": \"http://example.com\" }";
+
+            doRequest(body).andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void shouldReturnBadRequestNoUrl() throws Exception {
+            final var body = "{ \"name\": \"MyApp\" }";
+
+            doRequest(body).andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void shouldReturnOk() throws Exception {
+            doRequest(objectMapper.writeValueAsString(applicationDto)).andExpect(status().isOk());
+        }
+
+        private ResultActions doRequest(final String body) throws Exception {
+            return mockMvc.perform(post("/api/applications").contentType(MediaType.APPLICATION_JSON).content(body));
+        }
+
     }
 
     @Nested
     class UpdateApplicationTest {
 
         @Test
-        void shouldUpdateApplication() throws Exception {
-            mockMvc.perform(put("/api/applications/{id}", 1L)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(applicationDto)))
-                .andExpect(status().isOk());
+        void shouldCallService() throws Exception {
+            mockMvc.perform(put("/api/applications/{id}", monitoredApplicationId).contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(applicationDto))).andExpect(status().isOk());
 
-            verify(service).update(anyLong(), any(MonitoredAppDto.class));
+            verify(service).update(monitoredApplicationId, applicationDto);
+        }
+
+        @Test
+        void shouldReturnNotFound() throws Exception {
+            doThrow(new ApplicationNotFoundException(monitoredApplicationId)).when(service)
+                .update(anyLong(), any(MonitoredApplicationDto.class));
+
+            mockMvc.perform(put("/api/applications/{id}", monitoredApplicationId).contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(applicationDto))).andExpect(status().isNotFound());
+        }
+
+        @Test
+        void shouldReturnBadRequestNoBody() throws Exception {
+            mockMvc.perform(put("/api/applications/{id}", monitoredApplicationId).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void shouldReturnBadRequestNoName() throws Exception {
+            final var body = "{ \"url\": \"http://example.com\" }";
+
+            doRequest(body).andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void shouldReturnBadRequestNoUrl() throws Exception {
+            final var body = "{ \"name\": \"MyApp\" }";
+
+            doRequest(body).andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void shouldReturnOk() throws Exception {
+            doRequest(objectMapper.writeValueAsString(applicationDto)).andExpect(status().isOk());
+        }
+
+        private ResultActions doRequest(final String body) throws Exception {
+            return mockMvc.perform(put("/api/applications/{id}", monitoredApplicationId).contentType(MediaType.APPLICATION_JSON)
+                                       .content(body));
         }
     }
 
@@ -151,12 +272,78 @@ class MonitoringApplicationControllerTest {
     class DeleteApplicationTest {
 
         @Test
-        void shouldDeleteApplication() throws Exception {
-            mockMvc.perform(delete("/api/applications/{id}", 1L))
-                .andExpect(status().isOk());
+        void shouldCallService() throws Exception {
+            doRequest();
 
-            verify(service).deleteById(anyLong());
+            verify(service).deleteById(monitoredApplicationId);
         }
+
+        @Test
+        void shouldReturnNotFound() throws Exception {
+            doThrow(new ApplicationNotFoundException(monitoredApplicationId)).when(service).deleteById(monitoredApplicationId);
+
+            doRequest().andExpect(status().isNotFound());
+        }
+
+        @Test
+        void shouldReturnOk() throws Exception {
+            doRequest().andExpect(status().isOk());
+        }
+
+        private ResultActions doRequest() throws Exception {
+            return mockMvc.perform(delete("/api/applications/{id}", monitoredApplicationId));
+        }
+    }
+
+    @Nested
+    class HandleApplicationNotFoundTest {
+
+        @Test
+        void shouldHandleApplicationNotFound() throws Exception {
+            doThrow(new ApplicationNotFoundException(monitoredApplicationId)).when(service).getById(monitoredApplicationId);
+
+            doRequest().andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Application with id 1 not found"));
+        }
+
+        private ResultActions doRequest() throws Exception {
+            return mockMvc.perform(get("/api/applications/{id}", monitoredApplicationId));
+        }
+
+    }
+
+    @Nested
+    class HandleMessageNotReadableExceptionTest {
+
+        @Test
+        void shouldHandleHttpMessageNotReadableException() throws Exception {
+            final var body = "{ \"name\": \"MyApp\", \"url\": \"http://example.com\" ";
+
+            doRequest(body).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(
+                    "JSON parse error: Unexpected end-of-input: expected close marker for Object (start marker at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1])"));
+        }
+
+        private ResultActions doRequest(final String body) throws Exception {
+            return mockMvc.perform(post("/api/applications").contentType(MediaType.APPLICATION_JSON).content(body));
+        }
+
+    }
+
+    @Nested
+    class HandleMethodArgumentNotValidExceptionTest {
+
+        @Test
+        void shouldHandleMethodArgumentNotValidException() throws Exception {
+            final var invalidDto = "{ \"name\": null, \"url\": null }";
+
+            doRequest(invalidDto).andExpect(status().isBadRequest());
+        }
+
+        private ResultActions doRequest(final String body) throws Exception {
+            return mockMvc.perform(post("/api/applications").contentType(MediaType.APPLICATION_JSON).content(body));
+        }
+
     }
 
 }
