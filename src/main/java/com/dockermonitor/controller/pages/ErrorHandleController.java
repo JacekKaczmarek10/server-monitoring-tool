@@ -2,20 +2,13 @@ package com.dockermonitor.controller.pages;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.stream.Collectors;
 import org.springframework.boot.web.servlet.error.ErrorController;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.sql.Timestamp;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @ControllerAdvice
@@ -32,15 +25,6 @@ public class ErrorHandleController implements ErrorController {
         model.addAttribute("timestamp", timestamp);
 
         return "error";
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult().getAllErrors().stream()
-            .map(ObjectError::getDefaultMessage)
-            .collect(Collectors.joining(", "));
-        return ResponseEntity.badRequest().body(errorMessage);
     }
 
     int getErrorStatus(HttpServletRequest request) {

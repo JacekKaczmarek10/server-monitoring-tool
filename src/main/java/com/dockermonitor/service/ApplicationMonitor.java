@@ -23,10 +23,10 @@ public class ApplicationMonitor {
     }
 
     @Scheduled(cron = "0/30 * * * * *")
-    public void checkApplicationStatus() {
+    void checkApplicationStatus() {
         final var applications = repository.findAll();
         applications.stream().forEach(app -> {
-            final var currentStatus = app.isActive();
+            final var currentStatus = app.getActive();
             final var isActive = checkStatus(app.getUrl());
             app.setActive(isActive);
             repository.save(app);
@@ -37,7 +37,7 @@ public class ApplicationMonitor {
         });
     }
 
-    private boolean checkStatus(String url) {
+    boolean checkStatus(String url) {
         return webClient.get()
                 .uri(url)
                 .retrieve()

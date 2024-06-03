@@ -1,13 +1,16 @@
 package com.dockermonitor.controller.rest;
 
-import com.dockermonitor.dto.MonitoredAppDto;
+import com.dockermonitor.dto.ExceptionMessageDto;
+import com.dockermonitor.dto.MonitoredApplicationDto;
 import com.dockermonitor.entity.MonitoredApplication;
 import com.dockermonitor.exception.ApplicationNotFoundException;
 import com.dockermonitor.service.MonitoredApplicationService;
 import java.util.stream.Collectors;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -39,12 +42,12 @@ public class MonitoringApplicationController {
     }
 
     @PostMapping("")
-    public ResponseEntity<MonitoredApplication> createApplication(@RequestBody MonitoredAppDto applicationDto) {
+    public ResponseEntity<MonitoredApplication> createApplication(@RequestBody @Validated @NonNull MonitoredApplicationDto applicationDto) {
         return ResponseEntity.ok(monitoredApplicationService.create(applicationDto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateApplication(@PathVariable Long id, @RequestBody MonitoredAppDto applicationDto) {
+    public ResponseEntity<Void> updateApplication(@PathVariable Long id, @RequestBody MonitoredApplicationDto applicationDto) {
         monitoredApplicationService.update(id, applicationDto);
         return ResponseEntity.ok().build();
     }
@@ -57,14 +60,20 @@ public class MonitoringApplicationController {
 
     @ExceptionHandler({ApplicationNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<String> handleApplicationNotFound(ApplicationNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    public ResponseEntity<ExceptionMessageDto> handleApplicationNotFound(ApplicationNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionMessageDto(ex.getMessage()));
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ExceptionMessageDto> handleMessageNotReadableException(HttpMessageNotReadableException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionMessageDto(ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult().getAllErrors().stream()
+        final var errorMessage = ex.getBindingResult().getAllErrors().stream()
             .map(ObjectError::getDefaultMessage)
             .collect(Collectors.joining(", "));
         return ResponseEntity.badRequest().body(errorMessage);

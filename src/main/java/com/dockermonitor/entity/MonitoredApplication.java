@@ -7,10 +7,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Data
 @Entity
 @Table(name = "monitored_application")
+@NoArgsConstructor
 public class MonitoredApplication {
 
     @Id
@@ -18,11 +21,14 @@ public class MonitoredApplication {
     private Long id;
 
     @Column(unique = true)
+    @NonNull
     private String name;
 
     @Column(unique = true)
+    @NonNull
     private String url;
 
     @Column
-    private boolean active;
+    @NonNull
+    private Boolean active;
 }

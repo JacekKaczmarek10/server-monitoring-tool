@@ -1,6 +1,6 @@
 package com.dockermonitor.service;
 
-import com.dockermonitor.dto.MonitoredAppDto;
+import com.dockermonitor.dto.MonitoredApplicationDto;
 import com.dockermonitor.entity.MonitoredApplication;
 import com.dockermonitor.exception.ApplicationNotFoundException;
 import com.dockermonitor.repository.MonitoredApplicationRepository;
@@ -29,10 +29,10 @@ public class MonitoredApplicationService {
     public boolean getStatusById(Long id) {
         final var application = repository.findById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException(id));
-        return application.isActive();
+        return application.getActive();
     }
 
-    public MonitoredApplication create(MonitoredAppDto applicationDto) {
+    public MonitoredApplication create(MonitoredApplicationDto applicationDto) {
         final var application = new MonitoredApplication();
         application.setName(applicationDto.name());
         application.setUrl(applicationDto.url());
@@ -40,12 +40,16 @@ public class MonitoredApplicationService {
         return application;
     }
 
-    public void update(Long id, MonitoredAppDto applicationDto) {
+    public void update(Long id, MonitoredApplicationDto applicationDto) {
         final var application = repository.findById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException(id));
         application.setName(applicationDto.name());
         application.setUrl(applicationDto.url());
         repository.save(application);
+    }
+
+    private void validateUrl(String url) {
+
     }
 
     public void deleteById(Long id) {
