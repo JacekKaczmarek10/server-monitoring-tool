@@ -37,4 +37,4 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd /srv/Server-Monitoring-Tool  # Change directory to where update.sh is located
-            ./update.sh  # Execute the update.sh script
+            sudo ./update.sh  # Execute the update.sh script
