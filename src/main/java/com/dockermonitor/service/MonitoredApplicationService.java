@@ -32,7 +32,7 @@ public class MonitoredApplicationService {
     public boolean getStatusById(final Long id) {
         final var application = repository.findById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException(id));
-        return application.getActive();
+        return application.isActive();
     }
 
     public MonitoredApplication create(final MonitoredApplicationDto applicationDto) {

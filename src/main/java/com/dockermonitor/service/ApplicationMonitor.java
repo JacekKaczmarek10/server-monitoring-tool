@@ -26,7 +26,7 @@ public class ApplicationMonitor {
     void checkApplicationStatus() {
         final var applications = repository.findAll();
         applications.stream().forEach(app -> {
-            final var currentStatus = app.getActive();
+            final var currentStatus = app.isActive();
             final var isActive = checkStatus(app.getUrl());
             app.setActive(isActive);
             repository.save(app);

@@ -32,5 +32,5 @@ public class MonitoredApplication {
 
     @Column
     @NonNull
-    private Boolean active;
+    private boolean active;
 }
