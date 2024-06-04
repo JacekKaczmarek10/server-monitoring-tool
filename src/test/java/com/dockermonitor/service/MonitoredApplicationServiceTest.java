@@ -1,9 +1,9 @@
 package com.dockermonitor.service;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +11,7 @@ import com.dockermonitor.dto.MonitoredApplicationDto;
 import com.dockermonitor.entity.MonitoredApplication;
 import com.dockermonitor.exception.ApplicationNotFoundException;
 import com.dockermonitor.repository.MonitoredApplicationRepository;
+import com.dockermonitor.validator.UrlValidator;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,9 @@ class MonitoredApplicationServiceTest {
 
     @InjectMocks
     private MonitoredApplicationService service;
+
+    @Mock
+    private UrlValidator urlValidator;
 
     @Mock
     private MonitoredApplicationRepository repository;
@@ -138,6 +142,13 @@ class MonitoredApplicationServiceTest {
         private final MonitoredApplicationDto monitoredApplicationDto = new MonitoredApplicationDto(name, url);
 
         @Test
+        void shouldValidateUrl() {
+            callService();
+
+            verify(urlValidator).validateUrl(url);
+        }
+
+        @Test
         void shouldSave() {
             callService();
 
@@ -174,6 +185,70 @@ class MonitoredApplicationServiceTest {
     @Nested
     class UpdateTest {
 
+        private final long id = 1L;
+        private final String name = "Facebook";
+        private final String url = "https://www.facebook.com/";
+        private final MonitoredApplicationDto monitoredApplicationDto = new MonitoredApplicationDto(name, url);
+        private final MonitoredApplication monitoredApplication = new MonitoredApplication();
+
+        @Test
+        void shouldValidateUrl() {
+            when(repository.findById(id)).thenReturn(Optional.of(monitoredApplication));
+
+            callService();
+
+            verify(urlValidator).validateUrl(url);
+        }
+
+        @Test
+        void shouldFindById() {
+            when(repository.findById(id)).thenReturn(Optional.of(monitoredApplication));
+
+            callService();
+
+            verify(repository).findById(id);
+        }
+
+        @Test
+        void shouldThrowApplicationNotFoundException() {
+            when(repository.findById(id)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> callService()).isInstanceOf(ApplicationNotFoundException.class);
+        }
+
+        @Test
+        void shouldUpdateName() {
+            when(repository.findById(id)).thenReturn(Optional.of(monitoredApplication));
+
+            callService();
+
+            final var monitoredApplication = repository.findById(id);
+            assertThat(monitoredApplication.get().getName()).isEqualTo(name);
+        }
+
+        @Test
+        void shouldUpdateUrl() {
+            when(repository.findById(id)).thenReturn(Optional.of(monitoredApplication));
+
+            callService();
+
+            final var monitoredApplication = repository.findById(id);
+            assertThat(monitoredApplication.get().getUrl()).isEqualTo(url);
+        }
+
+        @Test
+        void shouldSave() {
+            when(repository.findById(id)).thenReturn(Optional.of(monitoredApplication));
+
+            callService();
+
+            verify(repository).save(any());
+        }
+
+        private void callService() {
+            service.update(id, monitoredApplicationDto);
+        }
+
     }
 
     @Nested
@@ -184,6 +259,25 @@ class MonitoredApplicationServiceTest {
     @Nested
     class DeleteByIdTest {
 
+        private final long id = 1L;
+
+        @Test
+        void shouldDeleteById() {
+            callService();
+
+            verify(repository).deleteById(id);
+        }
+
+        @Test
+        void shouldThrowEmptyResultDataAccessException() {
+            doThrow(ApplicationNotFoundException.class).when(repository).deleteById(id);
+
+            assertThatThrownBy(() -> callService()).isInstanceOf(ApplicationNotFoundException.class);
+        }
+
+        private void callService() {
+            service.deleteById(id);
+        }
     }
 
 }
