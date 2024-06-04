@@ -27,6 +27,8 @@ mvn spring-boot:run
 docker compose up -d --build
 ```
 
+## Swagger url
+http://localhost:8052/swagger-ui/index.html
 
 ## H2 Database url
 http://localhost:8080/h2-console
