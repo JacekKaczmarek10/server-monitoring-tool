@@ -4,6 +4,7 @@ import com.dockermonitor.dto.MonitoredApplicationDto;
 import com.dockermonitor.entity.MonitoredApplication;
 import com.dockermonitor.exception.ApplicationNotFoundException;
 import com.dockermonitor.repository.MonitoredApplicationRepository;
+import com.dockermonitor.validator.UrlValidator;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 @Transactional
 @RequiredArgsConstructor
 public class MonitoredApplicationService {
+
+    private final UrlValidator urlValidator;
 
     private final MonitoredApplicationRepository repository;
 
@@ -33,6 +36,7 @@ public class MonitoredApplicationService {
     }
 
     public MonitoredApplication create(final MonitoredApplicationDto applicationDto) {
+        urlValidator.validateUrl(applicationDto.url());
         final var application = new MonitoredApplication();
         application.setName(applicationDto.name());
         application.setUrl(applicationDto.url());
@@ -41,15 +45,12 @@ public class MonitoredApplicationService {
     }
 
     public void update(final Long id, final MonitoredApplicationDto applicationDto) {
+        urlValidator.validateUrl(applicationDto.url());
         final var application = repository.findById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException(id));
         application.setName(applicationDto.name());
         application.setUrl(applicationDto.url());
         repository.save(application);
-    }
-
-    private void validateUrl(final String url) {
-
     }
 
     public void deleteById(final Long id) {
