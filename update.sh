@@ -1,1 +1,1 @@
-git pull && docker compose down && docker compose up -d --build
+git pull -f && docker compose down && docker compose up -d --build
