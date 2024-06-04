@@ -21,18 +21,18 @@ public class MonitoredApplicationService {
         return repository.findAll();
     }
 
-    public MonitoredApplication getById(Long id) {
+    public MonitoredApplication getById(final Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException(id));
     }
 
-    public boolean getStatusById(Long id) {
+    public boolean getStatusById(final Long id) {
         final var application = repository.findById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException(id));
         return application.getActive();
     }
 
-    public MonitoredApplication create(MonitoredApplicationDto applicationDto) {
+    public MonitoredApplication create(final MonitoredApplicationDto applicationDto) {
         final var application = new MonitoredApplication();
         application.setName(applicationDto.name());
         application.setUrl(applicationDto.url());
@@ -40,7 +40,7 @@ public class MonitoredApplicationService {
         return application;
     }
 
-    public void update(Long id, MonitoredApplicationDto applicationDto) {
+    public void update(final Long id, final MonitoredApplicationDto applicationDto) {
         final var application = repository.findById(id)
                 .orElseThrow(() -> new ApplicationNotFoundException(id));
         application.setName(applicationDto.name());
@@ -48,11 +48,11 @@ public class MonitoredApplicationService {
         repository.save(application);
     }
 
-    private void validateUrl(String url) {
+    private void validateUrl(final String url) {
 
     }
 
-    public void deleteById(Long id) {
+    public void deleteById(final Long id) {
         try {
             repository.deleteById(id);
         } catch (EmptyResultDataAccessException ignored) {
