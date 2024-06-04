@@ -3,6 +3,7 @@ package com.dockermonitor.controller.rest;
 import com.dockermonitor.service.ImportMonitoredApplicationService;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,8 +27,9 @@ public class ImportMonitoringApplicationController {
             importApplicationsFromCSV.importApplicationsFromCSV(file);
             return ResponseEntity.ok("CSV file imported successfully.");
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Failed to import CSV file: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to import CSV file: " + e.getMessage());
+        } catch (DataIntegrityViolationException dataIntegrityViolationException) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(dataIntegrityViolationException.getMessage());
         }
     }
 

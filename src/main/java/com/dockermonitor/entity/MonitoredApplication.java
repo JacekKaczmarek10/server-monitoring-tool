@@ -31,6 +31,5 @@ public class MonitoredApplication {
     private String url;
 
     @Column
-    @NonNull
     private boolean active;
 }

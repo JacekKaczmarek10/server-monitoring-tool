@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -70,13 +71,25 @@ class ImportMonitoringApplicationControllerTest {
                 .andExpect(MockMvcResultMatchers.content().string("Failed to import CSV file: File not found"));
         }
 
+        @Test
+        void shouldHandleDataIntegrityViolationException() throws Exception {
+            final var file = new MockMultipartFile("file",
+                                                   "test.csv",
+                                                   MediaType.TEXT_PLAIN_VALUE,
+                                                   "name,url\nFacebook,https://facebook.com".getBytes());
+            doThrow(new DataIntegrityViolationException("Duplicate entry for key 'URL'")).when(service).importApplicationsFromCSV(file);
+
+            mockMvc.perform(MockMvcRequestBuilders.multipart("/api/applications/import").file(file))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.content().string("Duplicate entry for key 'URL'"));
+        }
 
         private ResultActions doRequest() throws Exception {
             return mockMvc.perform(MockMvcRequestBuilders.multipart("/api/applications/import")
                                        .file("file", multipartFile.getBytes())
                                        .contentType(MediaType.MULTIPART_FORM_DATA));
         }
-    }
 
+    }
 
 }
