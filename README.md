@@ -1,7 +1,8 @@
 # server-monitoring-tool
 
 A web application that informs about the status of the website in real time.
-The code was written using TDD.
+The code was written using TDD. Technologies: Java 21, Spring Boot 3, H2 databse.
+CI and CD integration was prepared. 
 
 ## Representantion
 ![Screenshot from 2024-06-04 19-44-08](https://github.com/JacekKaczmarek10/Server-Monitoring-Tool/assets/104677364/41b8271d-01c4-4a2e-82aa-2eb4efd65041)
