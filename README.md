@@ -29,6 +29,10 @@ mvn spring-boot:run
 docker compose up -d --build
 ```
 
+## Credentials
+
+For credentials contact: kaczmarek.jacek10@gmail.com
+
 ## Swagger url
 http://localhost:8052/swagger-ui/index.html
 
