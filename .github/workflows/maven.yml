@@ -48,4 +48,4 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd /srv/Server-Monitoring-Tool  &&
-            sudo ./update.sh
+            sudo ./update2.sh
