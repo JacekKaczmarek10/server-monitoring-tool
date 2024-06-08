@@ -1,1 +1,2 @@
-git pull -f && docker compose down && docker compose up -d --build
+sudo docker system prune &&
+sudo git pull -f && sudo docker compose down && sudo docker compose up -d --build
