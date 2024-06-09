@@ -2,14 +2,11 @@
 
 ## Supported Versions
 
-Version 3.5.4 is supported.
+Version 5.1.0 is supported.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| 5.1.0   | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
