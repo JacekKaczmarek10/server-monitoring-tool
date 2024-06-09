@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   servermonitor-backend:
     image: servermonitor-backend:latest
