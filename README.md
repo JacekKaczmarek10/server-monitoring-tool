@@ -35,6 +35,7 @@ For credentials contact: kaczmarek.jacek10@gmail.com
 
 ## Swagger url
 http://localhost:8052/swagger-ui/index.html
+https://server-monitor.dev.codepred.pl/swagger-ui/index.html
 
 ## H2 Database url
 http://localhost:8080/h2-console
