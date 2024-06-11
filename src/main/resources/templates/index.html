@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="container mt-5">
-  <h2 class="mb-4">Application monitor (1.0.0)</h2>
+  <h2 class="mb-4">Application monitor (${@environment.getProperty('app.version')} )</h2>
 
   <div th:insert="~{/modals/addApplicationForm.html}"></div>
 
