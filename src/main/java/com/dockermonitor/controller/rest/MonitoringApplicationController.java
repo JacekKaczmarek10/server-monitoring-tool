@@ -4,9 +4,8 @@ import com.dockermonitor.dto.ExceptionMessageDto;
 import com.dockermonitor.dto.MonitoredApplicationDto;
 import com.dockermonitor.entity.MonitoredApplication;
 import com.dockermonitor.exception.ApplicationNotFoundException;
-import com.dockermonitor.service.ImportMonitoredApplicationService;
+import com.dockermonitor.service.ApplicationMonitor;
 import com.dockermonitor.service.MonitoredApplicationService;
-import java.io.IOException;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +26,7 @@ import java.util.List;
 public class MonitoringApplicationController {
 
     private final MonitoredApplicationService monitoredApplicationService;
+    private final ApplicationMonitor applicationMonitor;
 
     @GetMapping("")
     public ResponseEntity<List<MonitoredApplication>> getApplications() {
@@ -41,6 +41,11 @@ public class MonitoringApplicationController {
     @GetMapping("/{id}/status")
     public ResponseEntity<Boolean> getApplicationStatus(@PathVariable Long id) {
         return ResponseEntity.ok(monitoredApplicationService.getStatusById(id));
+    }
+
+    @PostMapping("/status")
+    public ResponseEntity<Boolean> getApplicationStatusByUrl(@RequestParam @Validated @NonNull String url) {
+        return ResponseEntity.ok(applicationMonitor.checkStatus(url));
     }
 
     @PostMapping("")

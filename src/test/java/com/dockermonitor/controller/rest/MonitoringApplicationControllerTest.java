@@ -3,6 +3,7 @@ package com.dockermonitor.controller.rest;
 import com.dockermonitor.dto.MonitoredApplicationDto;
 import com.dockermonitor.entity.MonitoredApplication;
 import com.dockermonitor.exception.ApplicationNotFoundException;
+import com.dockermonitor.service.ApplicationMonitor;
 import com.dockermonitor.service.MonitoredApplicationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,12 +42,15 @@ class MonitoringApplicationControllerTest {
     @MockBean
     private MonitoredApplicationService service;
 
+    @MockBean
+    private ApplicationMonitor applicationMonitor;
+
     @Autowired
     private ObjectMapper objectMapper;
 
     private MonitoredApplication application;
     private MonitoredApplicationDto applicationDto;
-    private Long monitoredApplicationId = 1L;
+    private final Long monitoredApplicationId = 1L;
 
     @BeforeEach
     void setUp() {
@@ -165,6 +169,48 @@ class MonitoringApplicationControllerTest {
             return mockMvc.perform(get("/api/applications/{id}/status", monitoredApplicationId));
         }
     }
+
+    @Nested
+    class GetApplicationStatusByUrlTest {
+
+        private final String url = "https://codepred.pl/";
+
+        @Test
+        void shouldCallService() throws Exception {
+            when(applicationMonitor.checkStatus(any(String.class))).thenReturn(true);
+
+            doRequest().andExpect(status().isOk()).andExpect(jsonPath("$").value(true));
+
+            verify(applicationMonitor).checkStatus("https://codepred.pl/");
+        }
+
+        @Test
+        void shouldReturnApplicationStatus() throws Exception {
+            when(applicationMonitor.checkStatus(any(String.class))).thenReturn(true);
+
+            doRequest().andExpect(status().isOk()).andExpect(jsonPath("$").value(true));
+        }
+
+        @Test
+        void shouldReturnNotFound() throws Exception {
+            when(applicationMonitor.checkStatus(any(String.class))).thenThrow(ApplicationNotFoundException.class);
+
+            doRequest().andExpect(status().isNotFound());
+        }
+
+        @Test
+        void shouldReturnBadRequestWhenUrlIsMissing() throws Exception {
+            mockMvc.perform(post("/api/applications/status").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        }
+
+        private ResultActions doRequest() throws Exception {
+            return mockMvc.perform(post("/api/applications/status")
+                                       .param("url", url)
+                                       .contentType(MediaType.APPLICATION_JSON));
+        }
+    }
+
 
     @Nested
     class CreateApplicationTest {
