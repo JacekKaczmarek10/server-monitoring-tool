@@ -81,7 +81,7 @@ class ImportMonitoringApplicationControllerTest {
 
             mockMvc.perform(MockMvcRequestBuilders.multipart("/api/applications/import").file(file))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.content().string("Duplicate entry for key 'URL'"));
+                .andExpect(MockMvcResultMatchers.content().string("DataIntegrityViolationException occurred"));
         }
 
         private ResultActions doRequest() throws Exception {
