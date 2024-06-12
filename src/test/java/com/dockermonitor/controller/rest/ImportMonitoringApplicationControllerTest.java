@@ -68,7 +68,7 @@ class ImportMonitoringApplicationControllerTest {
 
             mockMvc.perform(MockMvcRequestBuilders.multipart("/api/applications/import").file(file))
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andExpect(MockMvcResultMatchers.content().string("Failed to import CSV file: File not found"));
+                .andExpect(MockMvcResultMatchers.content().string("Failed to import CSV file: " + file.getName()));
         }
 
         @Test
