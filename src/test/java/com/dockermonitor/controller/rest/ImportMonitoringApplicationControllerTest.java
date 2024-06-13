@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(ImportMonitoringApplicationController.class)
@@ -68,7 +69,7 @@ class ImportMonitoringApplicationControllerTest {
 
             mockMvc.perform(MockMvcRequestBuilders.multipart("/api/applications/import").file(file))
                 .andExpect(MockMvcResultMatchers.status().isInternalServerError())
-                .andExpect(MockMvcResultMatchers.content().string("Failed to import CSV file: " + file.getName()));
+                .andExpect(MockMvcResultMatchers.content().string("Failed to import CSV file: " + HtmlUtils.htmlEscape(file.getName())));
         }
 
         @Test

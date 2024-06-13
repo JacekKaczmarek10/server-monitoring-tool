@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 @RestController
 @RequestMapping("/api/applications")
@@ -32,7 +33,7 @@ public class ImportMonitoringApplicationController {
             importApplicationsFromCSV.importApplicationsFromCSV(file);
             return ResponseEntity.ok("CSV file imported successfully.");
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to import CSV file: " + file.getName());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to import CSV file: " + HtmlUtils.htmlEscape(file.getName()));
         } catch (DataIntegrityViolationException ex) {
             logger.error("Exception occurred", ex);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("DataIntegrityViolationException occurred");
