@@ -51,5 +51,15 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
-            cd /srv/Server-Monitoring-Tool  &&
+            cd /srv/Server-Monitoring-Tool &&
             sudo ./update2.sh
+
+      - name: Health Check
+        run: |
+          sleep 10 # wait for the server to start
+          response=$(curl --write-out '%{http_code}' --silent --output /dev/null http://your-app-url/health)
+          if [ "$response" -ne 200 ]; then
+            echo "Health check failed with status code $response"
+            exit 1
+          fi
+          echo "Health check succeeded with status code $response"
