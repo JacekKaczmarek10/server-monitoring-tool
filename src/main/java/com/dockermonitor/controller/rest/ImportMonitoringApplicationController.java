@@ -1,6 +1,5 @@
 package com.dockermonitor.controller.rest;
 
-import com.dockermonitor.service.ApplicationMonitor;
 import com.dockermonitor.service.ImportMonitoredApplicationService;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +20,14 @@ import org.springframework.web.util.HtmlUtils;
 @RequestMapping("/api/applications")
 @RequiredArgsConstructor
 @Validated
-public class ImportMonitoringApplicationController {
+class ImportMonitoringApplicationController {
 
     private static final Logger logger = LoggerFactory.getLogger(ImportMonitoringApplicationController.class);
 
     private final ImportMonitoredApplicationService importApplicationsFromCSV;
 
     @PostMapping("/import")
-    public ResponseEntity<String> importApplications(@RequestParam("file") MultipartFile file) {
+    ResponseEntity<String> importApplications(@RequestParam("file") MultipartFile file) {
         try {
             importApplicationsFromCSV.importApplicationsFromCSV(file);
             return ResponseEntity.ok("CSV file imported successfully.");

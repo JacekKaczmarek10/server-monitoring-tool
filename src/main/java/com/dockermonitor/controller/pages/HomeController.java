@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 @RequiredArgsConstructor
-public class HomeController {
+class HomeController {
 
     private final MonitoredApplicationRepository repository;
 
     @GetMapping("/")
-    public String index(Model model) {
+    String index(Model model) {
         model.addAttribute("apps", repository.findAll());
         return "index";
     }

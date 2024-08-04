@@ -12,10 +12,10 @@ import java.sql.Timestamp;
 
 @Controller
 @ControllerAdvice
-public class ErrorHandleController implements ErrorController {
+class ErrorHandleController implements ErrorController {
 
     @RequestMapping("/error")
-    public String handleError(HttpServletRequest request, Model model) {
+    String handleError(HttpServletRequest request, Model model) {
         final var errorStatus = getErrorStatus(request);
         final var errorType = getErrorType(errorStatus);
         final var timestamp = new Timestamp(System.currentTimeMillis());

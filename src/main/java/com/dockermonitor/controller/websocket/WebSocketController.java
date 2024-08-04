@@ -15,7 +15,7 @@ public class WebSocketController {
 
     @MessageMapping("/updateStatus")
     @SendTo("/topic/applicationStatus")
-    public MonitoredApplication updateStatus(MonitoredApplication application) {
+    MonitoredApplication updateStatus(MonitoredApplication application) {
         applicationService.updateApplicationStatus(application);
         return application;
     }
